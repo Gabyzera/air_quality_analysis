@@ -1,5 +1,6 @@
-import sys
+import os 
 import io
+import sys
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -36,14 +37,15 @@ plt.show()
 geographic_analysis_df = api.get_multiple_city_air(['Brazil', 'Argentina', 'Uruguai', 'Paraguai', 'Chile', 'Bolivia', 'Equador', 'Guiana Francesa', 'Venezuela', 
                                                     'Peru', 'Colômbia', 'Suriname', 'Guiana']) 
 
-shapefile_south_america = 'map_south_america/AMERICA_SUL.shp'
-map_south_america = gpd.read_file(shapefile_south_america)
-print(map_south_america)
+current_dir = os.path.dirname(__file__) 
+shapefile_path_south_america = os.path.join(current_dir, 'map_south_america', 'AMERICA_SUL.shp')
+map_south_america = gpd.read_file(shapefile_path_south_america)
 
-merged_map_shapefile_with_dataframe = map_south_america.merge(geographic_analysis_df, left_on='country', right_on='city')
+merged_map_shapefile_with_dataframe = map_south_america.merge(geographic_analysis_df, left_on='NOME', right_on='city')
 
+merged_map_shapefile_with_dataframe['pm2.5_log'] = np.log1p(merged_map_shapefile_with_dataframe['pm2.5'].fillna(0))
 fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-merged_map_shapefile_with_dataframe.plot(column='dominant_pollutant', ax= ax, legend=True, cmap=cmap_graph_map)
+merged_map_shapefile_with_dataframe.plot(column='pm2.5_log', ax=ax, legend=True, cmap='YlOrBr')
 
 ax.set_axis_off()
 plt.show()
